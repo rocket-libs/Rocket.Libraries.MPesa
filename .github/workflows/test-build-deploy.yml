@@ -23,12 +23,12 @@ jobs:
       
       - name: Run Tests
         run: |  
-          cd Rocket.Libraries.HttpRequestDecompression.Tests
+          cd Rocket.Libraries.MPesa.Tests
           dotnet test
           cd ..
             
       - name: Build solution and generate NuGet package
         run: |  
-          cd Rocket.Libraries.HttpRequestDecompression
+          cd Rocket.Libraries.MPesa
           dotnet build -c Release -o out  
           dotnet nuget push ./out/*.nupkg -k ${{secrets.Nuget_Key}} -s https://api.nuget.org/v3/index.json
