@@ -15,6 +15,7 @@ namespace Rocket.Libraries.MPesa.Extensions
         public static void AddMPesaSupport (this IServiceCollection services)
         {
             services
+                .AddMemoryCache()
                 .RegisterHttpClients ()
                 .AddTransient<IEnvironmentSpecificValues, EnvironmentSpecificValues> ()
                 .AddTransient<ICustomHttpClientProvider, CustomHttpClientProvider> ()
@@ -22,22 +23,23 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddTransient<ILoggedExceptionFetcher, LoggedExceptionFetcher> ()
                 .AddTransient<ITokenFetcher, TokenFetcher> ()
                 .AddTransient<IHttpCaller, HttpCaller> ()
-                .AddTransient<ITillNumberPayments, TillNumberPayments> ();
+                .AddTransient<ISTKPusher, STKPusher> ();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
         {
+            const byte defaultRetriesCount = 6;
             services
                 .AddHttpClient (HttpClientTypes.TokenFetcher.ToString ())
-                .AddPolicyHandler (GetRetryPolicy (totalRetries: 3));
+                .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
             services
                 .AddHttpClient (HttpClientTypes.STKPusher.ToString ())
-                .AddPolicyHandler (GetRetryPolicy (totalRetries: 4));
+                .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
 
             return services;
         }
 
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy (int totalRetries)
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy (byte totalRetries)
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError ()

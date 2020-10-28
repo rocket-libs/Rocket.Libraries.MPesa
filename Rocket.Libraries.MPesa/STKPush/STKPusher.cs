@@ -1,47 +1,54 @@
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Rocket.Libraries.MPesa.AccessToken;
 using Rocket.Libraries.MPesa.HttpClients;
 
 namespace Rocket.Libraries.MPesa.STKPush
 {
-    public interface ITillNumberPayments
+    public interface ISTKPusher
     {
-        Task PushToPhoneAsync(long requesterPhoneNumber, long tillNumber, long amount);
+        Task PushToPhoneAsync(Transaction transaction, Credentials credentials);
     }
 
-    public class TillNumberPayments : ITillNumberPayments
+    public class STKPusher : ISTKPusher
     {
         private readonly ITokenFetcher tokenFetcher;
         private readonly ICustomHttpClientProvider customHttpClientProvider;
         private readonly IEnvironmentSpecificValues environmentSpecificValues;
         private readonly IHttpCaller httpCaller;
 
-        public TillNumberPayments(
+        private readonly MPesaSettings mPesaSettings;
+
+        public STKPusher(
             ITokenFetcher tokenFetcher,
             ICustomHttpClientProvider customHttpClientProvider,
             IEnvironmentSpecificValues environmentSpecificValues,
-            IHttpCaller httpCaller)
+            IHttpCaller httpCaller,
+            IOptions<MPesaSettings> mPesaSettingsOptions)
         {
             this.tokenFetcher = tokenFetcher;
             this.customHttpClientProvider = customHttpClientProvider;
             this.environmentSpecificValues = environmentSpecificValues;
             this.httpCaller = httpCaller;
+            this.mPesaSettings = mPesaSettingsOptions.Value;
         }
 
-        public async Task PushToPhoneAsync(long requesterPhoneNumber, long tillNumber, long amount)
+        public async Task PushToPhoneAsync(Transaction transaction, Credentials credentials)
         {
             var lipaNaMpesaOnline = new LipaNaMpesaOnline
             {
-                BusinessShortCode = tillNumber.ToString(),
-                Amount = amount.ToString(),
-                PhoneNumber = requesterPhoneNumber.ToString(),
-                CallBackURL = $"{environmentSpecificValues.BaseUrl}mpesa/",
-                AccountReference = "Jamaica",
-                TransactionDesc = "This is a test",
-                Passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+                BusinessShortCode = transaction.BusinessShortCode.ToString(),
+                Amount = transaction.Amount.ToString(),
+                PhoneNumber = transaction.RequesterPhoneNumber.ToString(),
+                CallBackURL = mPesaSettings.CallBackUrl,
+                AccountReference = string.IsNullOrEmpty(transaction.AccountReference) ? "NA" : transaction.AccountReference,
+                TransactionDesc = string.IsNullOrEmpty(transaction.Description) ? "NA" : transaction.Description,
+                Passkey = credentials.PassKey,
+                TransactionType = transaction.TransactionType
             };
-            var tokenResponse = await tokenFetcher.FetchAsync();
+            
+            var accessToken = await tokenFetcher.FetchAsync(credentials);
 
             var response = await httpCaller.CallEndpoint<GenericResponse>(
                 HttpClientTypes.STKPusher,
@@ -50,7 +57,7 @@ namespace Rocket.Libraries.MPesa.STKPush
                 lipaNaMpesaOnline,
                 (request) =>
                 {
-                    request.Headers.Add("Authorization", $"Bearer {tokenResponse.AccessToken}");
+                    request.Headers.Add("Authorization", $"Bearer {accessToken}");
                 }
             );
 

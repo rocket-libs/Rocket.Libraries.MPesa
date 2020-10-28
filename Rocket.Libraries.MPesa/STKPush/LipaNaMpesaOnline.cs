@@ -39,7 +39,7 @@ namespace Rocket.Libraries.MPesa.STKPush
         /// The transaction type for M-Pesa Express is "CustomerPayBillOnline" 
         /// </summary>
         [JsonProperty("TransactionType")]
-        public string TransactionType { get; private set; } = TransactionTypes.CustomerPayBillOnline;
+        public string TransactionType { get; set; }
 
         /// <summary>
         /// This is the Amount transacted, normally a numeric value. Money that customer pays to the Shorcode. 
