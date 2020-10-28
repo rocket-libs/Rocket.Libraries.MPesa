@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Libraries.MPesa", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Libraries.MPesa.Tests", "Rocket.Libraries.MPesa.Tests\Rocket.Libraries.MPesa.Tests.csproj", "{78A815CD-CF9C-4009-8473-CF9AC8BA963C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.Libraries.MPesa.IntegrationTests", "Rocket.Libraries.MPesa.IntegrationTests\Rocket.Libraries.MPesa.IntegrationTests.csproj", "{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{78A815CD-CF9C-4009-8473-CF9AC8BA963C}.Release|x64.Build.0 = Release|Any CPU
 		{78A815CD-CF9C-4009-8473-CF9AC8BA963C}.Release|x86.ActiveCfg = Release|Any CPU
 		{78A815CD-CF9C-4009-8473-CF9AC8BA963C}.Release|x86.Build.0 = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|x64.Build.0 = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Debug|x86.Build.0 = Debug|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|x64.ActiveCfg = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|x64.Build.0 = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|x86.ActiveCfg = Release|Any CPU
+		{E5ADC6B9-5F34-40FF-B5A9-C0D005EC6FC7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

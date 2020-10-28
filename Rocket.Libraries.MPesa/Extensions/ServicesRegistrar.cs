@@ -6,6 +6,7 @@ using Polly.Extensions.Http;
 using Rocket.Libraries.MPesa.AccessToken;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
+using Rocket.Libraries.MPesa.STKPush;
 
 namespace Rocket.Libraries.MPesa.Extensions
 {
@@ -20,7 +21,8 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddTransient<ILogWriter, MPesaLogWriter> ()
                 .AddTransient<ILoggedExceptionFetcher, LoggedExceptionFetcher> ()
                 .AddTransient<ITokenFetcher, TokenFetcher> ()
-                .AddTransient<IHttpCaller, HttpCaller> ();
+                .AddTransient<IHttpCaller, HttpCaller> ()
+                .AddTransient<ITillNumberPayments, TillNumberPayments> ();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)

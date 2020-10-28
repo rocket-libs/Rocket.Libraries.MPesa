@@ -17,16 +17,19 @@ namespace Rocket.Libraries.MPesa.HttpClients
         private readonly ICustomHttpClientProvider customHttpClientProvider;
         private readonly ILoggedExceptionFetcher loggedExceptionFetcher;
         private readonly IEnvironmentSpecificValues environmentSpecificValues;
+        private readonly ILogWriter logWriter;
 
         public HttpCaller (
             ICustomHttpClientProvider customHttpClientProvider,
             ILoggedExceptionFetcher loggedExceptionFetcher,
-            IEnvironmentSpecificValues environmentSpecificValues
+            IEnvironmentSpecificValues environmentSpecificValues,
+            ILogWriter logWriter
         )
         {
             this.customHttpClientProvider = customHttpClientProvider;
             this.loggedExceptionFetcher = loggedExceptionFetcher;
             this.environmentSpecificValues = environmentSpecificValues;
+            this.logWriter = logWriter;
         }
 
         public async Task<TResult> CallEndpoint<TResult> (
@@ -56,6 +59,11 @@ namespace Rocket.Libraries.MPesa.HttpClients
                         return JsonConvert.DeserializeObject<TResult> (responseData);
                     }
                 }
+            }
+            catch(Exception e)
+            {
+                logWriter.LogException(e, "Error making call to M-Pesa");
+                throw;
             }
             finally
             {

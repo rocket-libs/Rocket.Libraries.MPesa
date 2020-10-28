@@ -16,7 +16,6 @@ namespace Rocket.Libraries.MPesa.AccessToken
 
     public class TokenFetcher : ITokenFetcher
     {
-        private readonly ICustomHttpClientProvider customHttpClientProvider;
         private readonly IHttpCaller httpCaller;
         private readonly ILoggedExceptionFetcher loggedExceptionFetcher;
         private readonly MPesaSettings mPesaKeys;
