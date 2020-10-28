@@ -26,6 +26,7 @@ jobs:
           cd Rocket.Libraries.MPesa.Tests
           dotnet test
           cd ..
+          
             
       - name: Build solution and generate NuGet package
         run: |  
