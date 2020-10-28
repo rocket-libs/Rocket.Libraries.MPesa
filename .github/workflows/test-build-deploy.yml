@@ -1,0 +1,34 @@
+name: NuGet Generation
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    name: Update NuGet package
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Setup .NET Core @ Latest
+        uses: actions/setup-dotnet@v1
+      
+      - name: Run Tests
+        run: |  
+          cd Rocket.Libraries.HttpRequestDecompression.Tests
+          dotnet test
+          cd ..
+            
+      - name: Build solution and generate NuGet package
+        run: |  
+          cd Rocket.Libraries.HttpRequestDecompression
+          dotnet build -c Release -o out  
+          dotnet nuget push ./out/*.nupkg -k ${{secrets.Nuget_Key}} -s https://api.nuget.org/v3/index.json
