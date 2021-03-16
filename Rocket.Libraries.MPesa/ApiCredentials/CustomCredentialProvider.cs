@@ -11,6 +11,9 @@ namespace Rocket.Libraries.MPesa.ApiCredentials
     /// <summary>
     /// For multi-tenant applications customize this class to
     /// return each tenants specific credentials.
+    /// 
+    /// Please note. The implementation used below is for the developer's machine and is completely useless for you.
+    /// You MUST create your own implementation.
     /// </summary>
     public class CustomCredentialProvider : ICustomCredentialProvider
     {

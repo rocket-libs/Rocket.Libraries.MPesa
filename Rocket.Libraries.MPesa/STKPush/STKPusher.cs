@@ -17,20 +17,24 @@ namespace Rocket.Libraries.MPesa.STKPush
     {
         private readonly IEnvironmentSpecificValues environmentSpecificValues;
         private readonly ITokenizedApiCaller tokenizedApiCaller;
+        private readonly ICredentialResolver credentialResolver;
         private readonly MPesaSettings mPesaSettings;
 
         public STKPusher(
             IEnvironmentSpecificValues environmentSpecificValues,
             IOptions<MPesaSettings> mPesaSettingsOptions,
-            ITokenizedApiCaller tokenizedApiCaller)
+            ITokenizedApiCaller tokenizedApiCaller,
+            ICredentialResolver credentialResolver)
         {
             this.environmentSpecificValues = environmentSpecificValues;
             this.tokenizedApiCaller = tokenizedApiCaller;
+            this.credentialResolver = credentialResolver;
             this.mPesaSettings = mPesaSettingsOptions.Value;
         }
 
         public async Task PushToPhoneAsync(Transaction transaction)
         {
+            var credentials = await credentialResolver.GetCredentialsAsync();
             var lipaNaMpesaOnline = new LipaNaMpesaOnline
             {
                 BusinessShortCode = transaction.BusinessShortCode.ToString(),
@@ -39,7 +43,7 @@ namespace Rocket.Libraries.MPesa.STKPush
                 CallBackURL = mPesaSettings.CallBackUrl,
                 AccountReference = string.IsNullOrEmpty(transaction.AccountReference) ? "NA" : transaction.AccountReference,
                 TransactionDesc = string.IsNullOrEmpty(transaction.Description) ? "NA" : transaction.Description,
-                Passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", // string.Empty, //credentials.PassKey,
+                Passkey = credentials.PassKey,
                 TransactionType = transaction.TransactionType
             };
             

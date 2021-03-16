@@ -22,6 +22,7 @@ namespace Rocket.Libraries.MPesa.ApiCredentials
             this.customCredentialProvider = customCredentialProvider;
         }
 
+        
         public async Task<Credential> GetCredentialsAsync ()
         {
             var customCredential = await customCredentialProvider.GetAsync ();
