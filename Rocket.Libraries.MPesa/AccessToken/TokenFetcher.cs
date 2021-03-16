@@ -1,7 +1,6 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -22,20 +21,21 @@ namespace Rocket.Libraries.MPesa.AccessToken
         private readonly IHttpCaller httpCaller;
         private readonly ILoggedExceptionFetcher loggedExceptionFetcher;
         private readonly IMemoryCache memoryCache;
-        private readonly ICredentialResolver credentialResolver;
+        private readonly ICredentialEncryptor credentialEncryptor;
 
         public TokenFetcher (
             IOptions<MPesaSettings> mPesaKeysOptions,
             IHttpCaller httpCaller,
             ILoggedExceptionFetcher loggedExceptionFetcher,
             IMemoryCache memoryCache,
-            ICredentialResolver credentialResolver)
+            ICredentialEncryptor credentialEncryptor
+            )
         {
             
             this.httpCaller = httpCaller;
             this.loggedExceptionFetcher = loggedExceptionFetcher;
             this.memoryCache = memoryCache;
-            this.credentialResolver = credentialResolver;
+            this.credentialEncryptor = credentialEncryptor;
         }
 
         public async Task<string> FetchAsync ()
@@ -63,7 +63,7 @@ namespace Rocket.Libraries.MPesa.AccessToken
 
         private async Task<string> FetchTokenFromThirdPartyAsync()
         {
-            var credentials = await credentialResolver.GetCredentialsAsync();
+            var encryptedCredentials = await credentialEncryptor.GetEncryptedCredentialsAsync();
             var tokenResponse = await httpCaller.CallEndpoint<TokenResponse> (
                 HttpClientTypes.TokenFetcher,
                 relativePath: "oauth/v1/generate?grant_type=client_credentials",
@@ -71,8 +71,7 @@ namespace Rocket.Libraries.MPesa.AccessToken
                 payload: default,
                 (request) =>
                 {
-                    var keyBytes = Convert.ToBase64String (Encoding.UTF8.GetBytes ($"{credentials.ConsumerKey}:{credentials.ConsumerSecret}"));
-                    request.Headers.Authorization = new AuthenticationHeaderValue ("Basic", keyBytes);
+                    request.Headers.Authorization = new AuthenticationHeaderValue ("Basic", encryptedCredentials);
                 }
             );
             return tokenResponse.AccessToken;

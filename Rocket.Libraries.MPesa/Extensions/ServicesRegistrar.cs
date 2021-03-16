@@ -6,6 +6,7 @@ using Polly.Extensions.Http;
 using Rocket.Libraries.MPesa.AccessToken;
 using Rocket.Libraries.MPesa.ApiCalling;
 using Rocket.Libraries.MPesa.ApiCredentials;
+using Rocket.Libraries.MPesa.BusinessToCustomer;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
 using Rocket.Libraries.MPesa.STKPush;
@@ -28,7 +29,9 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddScoped<ISTKPusher, STKPusher>()
                 .AddScoped<ICredentialResolver, CredentialResolver>()
                 .AddScoped<ICustomCredentialProvider, CustomCredentialProvider>()
-                .AddScoped<ITokenizedApiCaller, TokenizedApiCaller>();
+                .AddScoped<ITokenizedApiCaller, TokenizedApiCaller>()
+                .AddScoped<ICredentialEncryptor, CredentialEncryptor>()
+                .AddScoped<IBusinessToCustomerPaymentRequester, BusinessToCustomerPaymentRequester>();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
