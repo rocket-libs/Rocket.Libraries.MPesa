@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Rocket.Libraries.MPesa.ApiCredentials;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
 
@@ -12,7 +13,7 @@ namespace Rocket.Libraries.MPesa.AccessToken
 {
     public interface ITokenFetcher
     {
-        Task<string> FetchAsync (Credentials credentials);
+        Task<string> FetchAsync ();
     }
 
     public class TokenFetcher : ITokenFetcher
@@ -21,19 +22,23 @@ namespace Rocket.Libraries.MPesa.AccessToken
         private readonly IHttpCaller httpCaller;
         private readonly ILoggedExceptionFetcher loggedExceptionFetcher;
         private readonly IMemoryCache memoryCache;
+        private readonly ICredentialResolver credentialResolver;
+
         public TokenFetcher (
             IOptions<MPesaSettings> mPesaKeysOptions,
             IHttpCaller httpCaller,
             ILoggedExceptionFetcher loggedExceptionFetcher,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            ICredentialResolver credentialResolver)
         {
             
             this.httpCaller = httpCaller;
             this.loggedExceptionFetcher = loggedExceptionFetcher;
             this.memoryCache = memoryCache;
+            this.credentialResolver = credentialResolver;
         }
 
-        public async Task<string> FetchAsync (Credentials credentials)
+        public async Task<string> FetchAsync ()
         {
             var accessToken = string.Empty;
             if(memoryCache.TryGetValue<string>(accessTokenCacheKey,out accessToken))
@@ -42,7 +47,7 @@ namespace Rocket.Libraries.MPesa.AccessToken
             }
             else
             {
-                accessToken = await FetchTokenFromThirdPartyAsync(credentials);
+                accessToken = await FetchTokenFromThirdPartyAsync();
                 CacheToken(accessToken);
                 return accessToken;
             }
@@ -56,8 +61,9 @@ namespace Rocket.Libraries.MPesa.AccessToken
             memoryCache.Set(accessTokenCacheKey, accessToken,cacheEntryOptions);
         }
 
-        private async Task<string> FetchTokenFromThirdPartyAsync(Credentials credentials)
+        private async Task<string> FetchTokenFromThirdPartyAsync()
         {
+            var credentials = await credentialResolver.GetCredentialsAsync();
             var tokenResponse = await httpCaller.CallEndpoint<TokenResponse> (
                 HttpClientTypes.TokenFetcher,
                 relativePath: "oauth/v1/generate?grant_type=client_credentials",

@@ -1,14 +1,9 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Rocket.Libraries.MPesa.STKPush;
 using Rocket.Libraries.MPesa.Extensions;
-using Microsoft.Extensions.DependencyInjection.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System.IO;
-using Microsoft.Extensions.Configuration.FileExtensions;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using Rocket.Libraries.MPesa.AccessToken;
+using Rocket.Libraries.MPesa.ApiCredentials;
 
 namespace Rocket.Libraries.MPesa.IntegrationTests
 {
@@ -20,24 +15,20 @@ namespace Rocket.Libraries.MPesa.IntegrationTests
             var serviceProviderBuilder = new ServiceCollection ();
             serviceProviderBuilder.AddMPesaSupport();
             serviceProviderBuilder.Configure<MPesaSettings>(x => configuration.GetSection(nameof(MPesaSettings)).Bind(x));
+            serviceProviderBuilder.Configure<Credential>(x => configuration.GetSection("SingleMPesaTenantCredentials").Bind(x));
             var serviceProvider = serviceProviderBuilder.BuildServiceProvider();
 
             var stkPusher = serviceProvider.GetRequiredService<ISTKPusher> ();
 
             var transaction = new Transaction(
-                requesterPhoneNumber: 0, // Set the phone number to push the STK validation to.  
+                requesterPhoneNumber: 254721553229, // Set the phone number to push the STK validation to.  
                 businessShortCode: 174379,
                 amount: 1,
                 transactionType: TransactionTypes.CustomerBuyGoodsOnline);
 
-            var credentials = new Credentials(
-                consumerKey: "your-consumer-key-goes-here",
-                consumerSecret: "your-consumer-secret-goes-here",
-                passKey: "your-pass-key-goes-here");
-
             stkPusher.PushToPhoneAsync(
-                transaction, // REPLACE THE ZERO WITH TARGET PHONE NUMBER HERE
-                credentials)
+                transaction // REPLACE THE ZERO WITH TARGET PHONE NUMBER HERE
+                    )
                 .GetAwaiter().GetResult();
 
 
