@@ -3,10 +3,12 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
+using Rocket.Libraries.FormValidationHelper;
 using Rocket.Libraries.MPesa.AccessToken;
 using Rocket.Libraries.MPesa.ApiCalling;
 using Rocket.Libraries.MPesa.ApiCredentials;
 using Rocket.Libraries.MPesa.BusinessToCustomer;
+using Rocket.Libraries.MPesa.CustomerToBusinessRegistration;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
 using Rocket.Libraries.MPesa.STKPush;
@@ -31,7 +33,9 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddScoped<ICustomCredentialProvider, CustomCredentialProvider>()
                 .AddScoped<ITokenizedApiCaller, TokenizedApiCaller>()
                 .AddScoped<ICredentialEncryptor, CredentialEncryptor>()
-                .AddScoped<IBusinessToCustomerPaymentRequester, BusinessToCustomerPaymentRequester>();
+                .AddScoped<IBusinessToCustomerPaymentRequester, BusinessToCustomerPaymentRequester>()
+                .AddScoped<IValidationResponseHelper, ValidationResponseHelper>()
+                .AddScoped<ICustomerToBusinessUrlRegistrar, CustomerToBusinessUrlRegistrar>();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
@@ -39,9 +43,6 @@ namespace Rocket.Libraries.MPesa.Extensions
             const byte defaultRetriesCount = 6;
             services
                 .AddHttpClient (HttpClientTypes.TokenFetcher.ToString ())
-                .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
-            services
-                .AddHttpClient (HttpClientTypes.STKPusher.ToString ())
                 .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
 
             services

@@ -49,7 +49,6 @@ namespace Rocket.Libraries.MPesa.STKPush
             
             
             var response = await tokenizedApiCaller.CallEndpoint<GenericResponse>(
-                HttpClientTypes.STKPusher,
                 relativePath: "mpesa/stkpush/v1/processrequest",
                 HttpMethod.Post,
                 lipaNaMpesaOnline

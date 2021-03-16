@@ -8,7 +8,7 @@ namespace Rocket.Libraries.MPesa.ApiCalling
 {
     public interface ITokenizedApiCaller
     {
-        Task<TResult> CallEndpoint<TResult>(HttpClientTypes httpClientType, string relativePath, HttpMethod method, object payload);
+        Task<TResult> CallEndpoint<TResult>(string relativePath, HttpMethod method, object payload);
     }
 
     public class TokenizedApiCaller : ITokenizedApiCaller
@@ -26,14 +26,13 @@ namespace Rocket.Libraries.MPesa.ApiCalling
         }
 
         public async Task<TResult> CallEndpoint<TResult>(
-            HttpClientTypes httpClientType,
             string relativePath,
             HttpMethod method,
             object payload)
         {
             var accessToken = await tokenFetcher.FetchAsync();
             return await httpCaller.CallEndpoint<TResult>(
-                httpClientType,
+                HttpClientTypes.GenericClient,
                 relativePath,
                 method,
                 payload,
