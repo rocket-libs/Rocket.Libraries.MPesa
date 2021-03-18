@@ -1,14 +1,13 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Rocket.Libraries.MPesa.STKPush;
 using Rocket.Libraries.MPesa.Extensions;
-using Microsoft.Extensions.DependencyInjection.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System.IO;
-using Microsoft.Extensions.Configuration.FileExtensions;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using Rocket.Libraries.MPesa.AccessToken;
+using Rocket.Libraries.MPesa.ApiCredentials;
+using Rocket.Libraries.MPesa.BusinessToCustomer;
+using System;
+using System.Linq;
+using Rocket.Libraries.MPesa.CustomerToBusinessRegistration;
 
 namespace Rocket.Libraries.MPesa.IntegrationTests
 {
@@ -20,8 +19,55 @@ namespace Rocket.Libraries.MPesa.IntegrationTests
             var serviceProviderBuilder = new ServiceCollection ();
             serviceProviderBuilder.AddMPesaSupport();
             serviceProviderBuilder.Configure<MPesaSettings>(x => configuration.GetSection(nameof(MPesaSettings)).Bind(x));
+            serviceProviderBuilder.Configure<Credential>(x => configuration.GetSection("SingleMPesaTenantCredentials").Bind(x));
             var serviceProvider = serviceProviderBuilder.BuildServiceProvider();
+            RegisterC2BPayment(serviceProvider);
 
+
+        }
+
+        static void RegisterC2BPayment(ServiceProvider serviceProvider)
+        {
+            var c2bUrlRegistrar = serviceProvider.GetRequiredService<ICustomerToBusinessUrlRegistrar> ();
+            var customerToBusinessRegisterUrlRequest = new CustomerToBusinessRegisterUrlRequest
+            {
+                ConfirmationURL = "https://example.com",
+                ResponseType = CustomerToBusinessResponseTypes.Canceled,
+                ShortCode = 123456,
+                ValidationURL = "https://example.com",
+            };
+            var response = c2bUrlRegistrar.RegisterUrlAsync(customerToBusinessRegisterUrlRequest)
+                .GetAwaiter().GetResult();
+            if(response.HasErrors)
+            {
+                throw new Exception(response.ValidationErrors.First().Errors.First());
+            }
+        }
+
+        static void B2CPaymentRequest(ServiceProvider serviceProvider)
+        {
+            var b2cPaymentRequester = serviceProvider.GetRequiredService<IBusinessToCustomerPaymentRequester> ();
+            var businessToCustomerRequest = new BusinessToCustomerRequest
+            {
+                Amount = 1,
+                CommandID = BusinessToCustomerCommandIds.BusinessPayment,
+                InitiatorName = "Acme Payer",
+                PartyA = 123454,
+                PartyB = 254721553229,
+                Remarks = "This is a test",
+                QueueTimeOutURL = "https://example.com",
+                ResultURL = "https://example.com"
+            };
+            var response = b2cPaymentRequester.RequestPaymentAsync(businessToCustomerRequest)
+                .GetAwaiter().GetResult();
+            if(response.HasErrors)
+            {
+                throw new Exception(response.ValidationErrors.First().Errors.First());
+            }
+        }
+
+        static void StkPush(ServiceProvider serviceProvider)
+        {
             var stkPusher = serviceProvider.GetRequiredService<ISTKPusher> ();
 
             var transaction = new Transaction(
@@ -30,16 +76,10 @@ namespace Rocket.Libraries.MPesa.IntegrationTests
                 amount: 1,
                 transactionType: TransactionTypes.CustomerBuyGoodsOnline);
 
-            var credentials = new Credentials(
-                consumerKey: "your-consumer-key-goes-here",
-                consumerSecret: "your-consumer-secret-goes-here",
-                passKey: "your-pass-key-goes-here");
-
             stkPusher.PushToPhoneAsync(
-                transaction, // REPLACE THE ZERO WITH TARGET PHONE NUMBER HERE
-                credentials)
+                transaction // REPLACE THE ZERO WITH TARGET PHONE NUMBER HERE
+                    )
                 .GetAwaiter().GetResult();
-
 
         }
 

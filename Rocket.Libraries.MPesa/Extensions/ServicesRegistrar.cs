@@ -3,7 +3,13 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
+using Rocket.Libraries.FormValidationHelper;
 using Rocket.Libraries.MPesa.AccessToken;
+using Rocket.Libraries.MPesa.ApiCalling;
+using Rocket.Libraries.MPesa.ApiCredentials;
+using Rocket.Libraries.MPesa.BusinessToCustomer;
+using Rocket.Libraries.MPesa.CustomerToBusinessRegistration;
+using Rocket.Libraries.MPesa.CustomerToBusinessSimulation;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
 using Rocket.Libraries.MPesa.STKPush;
@@ -16,14 +22,22 @@ namespace Rocket.Libraries.MPesa.Extensions
         {
             services
                 .AddMemoryCache()
-                .RegisterHttpClients ()
-                .AddTransient<IEnvironmentSpecificValues, EnvironmentSpecificValues> ()
-                .AddTransient<ICustomHttpClientProvider, CustomHttpClientProvider> ()
-                .AddTransient<ILogWriter, MPesaLogWriter> ()
-                .AddTransient<ILoggedExceptionFetcher, LoggedExceptionFetcher> ()
-                .AddTransient<ITokenFetcher, TokenFetcher> ()
-                .AddTransient<IHttpCaller, HttpCaller> ()
-                .AddTransient<ISTKPusher, STKPusher> ();
+                .RegisterHttpClients()
+                .AddScoped<IEnvironmentSpecificValues, EnvironmentSpecificValues>()
+                .AddScoped<ICustomHttpClientProvider, CustomHttpClientProvider>()
+                .AddScoped<ILogWriter, MPesaLogWriter>()
+                .AddScoped<ILoggedExceptionFetcher, LoggedExceptionFetcher>()
+                .AddScoped<ITokenFetcher, TokenFetcher>()
+                .AddScoped<IHttpCaller, HttpCaller>()
+                .AddScoped<ISTKPusher, STKPusher>()
+                .AddScoped<ICredentialResolver, CredentialResolver>()
+                .AddScoped<ICustomCredentialProvider, CustomCredentialProvider>()
+                .AddScoped<ITokenizedApiCaller, TokenizedApiCaller>()
+                .AddScoped<ICredentialEncryptor, CredentialEncryptor>()
+                .AddScoped<IBusinessToCustomerPaymentRequester, BusinessToCustomerPaymentRequester>()
+                .AddScoped<IValidationResponseHelper, ValidationResponseHelper>()
+                .AddScoped<ICustomerToBusinessUrlRegistrar, CustomerToBusinessUrlRegistrar>()
+                .AddScoped<ICustomerToBusinessSimulator, CustomerToBusinessSimulator>();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
@@ -32,8 +46,9 @@ namespace Rocket.Libraries.MPesa.Extensions
             services
                 .AddHttpClient (HttpClientTypes.TokenFetcher.ToString ())
                 .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
+
             services
-                .AddHttpClient (HttpClientTypes.STKPusher.ToString ())
+                .AddHttpClient (HttpClientTypes.GenericClient.ToString ())
                 .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
 
             return services;

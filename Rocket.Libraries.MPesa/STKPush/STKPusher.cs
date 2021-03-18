@@ -2,40 +2,39 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Rocket.Libraries.MPesa.AccessToken;
+using Rocket.Libraries.MPesa.ApiCalling;
+using Rocket.Libraries.MPesa.ApiCredentials;
 using Rocket.Libraries.MPesa.HttpClients;
 
 namespace Rocket.Libraries.MPesa.STKPush
 {
     public interface ISTKPusher
     {
-        Task PushToPhoneAsync(Transaction transaction, Credentials credentials);
+        Task PushToPhoneAsync(Transaction transaction);
     }
 
     public class STKPusher : ISTKPusher
     {
-        private readonly ITokenFetcher tokenFetcher;
-        private readonly ICustomHttpClientProvider customHttpClientProvider;
         private readonly IEnvironmentSpecificValues environmentSpecificValues;
-        private readonly IHttpCaller httpCaller;
-
+        private readonly ITokenizedApiCaller tokenizedApiCaller;
+        private readonly ICredentialResolver credentialResolver;
         private readonly MPesaSettings mPesaSettings;
 
         public STKPusher(
-            ITokenFetcher tokenFetcher,
-            ICustomHttpClientProvider customHttpClientProvider,
             IEnvironmentSpecificValues environmentSpecificValues,
-            IHttpCaller httpCaller,
-            IOptions<MPesaSettings> mPesaSettingsOptions)
+            IOptions<MPesaSettings> mPesaSettingsOptions,
+            ITokenizedApiCaller tokenizedApiCaller,
+            ICredentialResolver credentialResolver)
         {
-            this.tokenFetcher = tokenFetcher;
-            this.customHttpClientProvider = customHttpClientProvider;
             this.environmentSpecificValues = environmentSpecificValues;
-            this.httpCaller = httpCaller;
+            this.tokenizedApiCaller = tokenizedApiCaller;
+            this.credentialResolver = credentialResolver;
             this.mPesaSettings = mPesaSettingsOptions.Value;
         }
 
-        public async Task PushToPhoneAsync(Transaction transaction, Credentials credentials)
+        public async Task PushToPhoneAsync(Transaction transaction)
         {
+            var credentials = await credentialResolver.GetCredentialsAsync();
             var lipaNaMpesaOnline = new LipaNaMpesaOnline
             {
                 BusinessShortCode = transaction.BusinessShortCode.ToString(),
@@ -48,17 +47,11 @@ namespace Rocket.Libraries.MPesa.STKPush
                 TransactionType = transaction.TransactionType
             };
             
-            var accessToken = await tokenFetcher.FetchAsync(credentials);
-
-            var response = await httpCaller.CallEndpoint<GenericResponse>(
-                HttpClientTypes.STKPusher,
+            
+            var response = await tokenizedApiCaller.CallEndpoint<GenericResponse>(
                 relativePath: "mpesa/stkpush/v1/processrequest",
                 HttpMethod.Post,
-                lipaNaMpesaOnline,
-                (request) =>
-                {
-                    request.Headers.Add("Authorization", $"Bearer {accessToken}");
-                }
+                lipaNaMpesaOnline
             );
 
         }

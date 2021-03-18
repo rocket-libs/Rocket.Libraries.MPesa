@@ -43,7 +43,7 @@ namespace Rocket.Libraries.MPesa.HttpClients
 
             // Don't wrap httpClient in a 'using' block. 
             // See: https://josef.codes/you-are-probably-still-using-httpclient-wrong-and-it-is-destabilizing-your-software/
-            var httpClient = customHttpClientProvider.GetHttpClient (HttpClientTypes.TokenFetcher);
+            var httpClient = customHttpClientProvider.GetHttpClient (httpClientType);
 
             try
             {
