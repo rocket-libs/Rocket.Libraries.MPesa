@@ -10,7 +10,7 @@ namespace Rocket.Libraries.MPesa.CustomerToBusinessRegistration
         /// This is the URL that receives the validation request from API upon payment submission. The validation URL is only called if the external validation on the registered shortcode is enabled.
         /// REQUIRED
         /// </summary>
-        [StringIsNonNullable("C2B ValidationURL")]
+        [StringIsValidUrlOrDefault("C2B ValidationUrl")]
         public string ValidationURL { get; set; }
 
         /// <summary>
@@ -18,6 +18,7 @@ namespace Rocket.Libraries.MPesa.CustomerToBusinessRegistration
         /// REQUIRED 
         /// </summary>
         [StringIsNonNullable("C2B ConfirmationURL")]
+        [StringIsValidUrlOrDefault("C2B ConfirmationURL")]
         public string ConfirmationURL { get; set; }
 
 
@@ -35,7 +36,8 @@ namespace Rocket.Libraries.MPesa.CustomerToBusinessRegistration
 
 
         /// <summary>
-        /// The short code of the organization. 
+        /// The short code of the organization.
+        /// REQUIRED
         /// </summary>
         [MinimumNumber(10000,"C2B Shortcode")]
         public int ShortCode { get; set; }

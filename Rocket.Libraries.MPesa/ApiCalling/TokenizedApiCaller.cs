@@ -1,7 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Rocket.Libraries.MPesa.AccessToken;
-using Rocket.Libraries.MPesa.ApiCredentials;
 using Rocket.Libraries.MPesa.HttpClients;
 
 namespace Rocket.Libraries.MPesa.ApiCalling

@@ -9,6 +9,7 @@ using Rocket.Libraries.MPesa.ApiCalling;
 using Rocket.Libraries.MPesa.ApiCredentials;
 using Rocket.Libraries.MPesa.BusinessToCustomer;
 using Rocket.Libraries.MPesa.CustomerToBusinessRegistration;
+using Rocket.Libraries.MPesa.CustomerToBusinessSimulation;
 using Rocket.Libraries.MPesa.HttpClients;
 using Rocket.Libraries.MPesa.Logging;
 using Rocket.Libraries.MPesa.STKPush;
@@ -35,7 +36,8 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddScoped<ICredentialEncryptor, CredentialEncryptor>()
                 .AddScoped<IBusinessToCustomerPaymentRequester, BusinessToCustomerPaymentRequester>()
                 .AddScoped<IValidationResponseHelper, ValidationResponseHelper>()
-                .AddScoped<ICustomerToBusinessUrlRegistrar, CustomerToBusinessUrlRegistrar>();
+                .AddScoped<ICustomerToBusinessUrlRegistrar, CustomerToBusinessUrlRegistrar>()
+                .AddScoped<ICustomerToBusinessSimulator, CustomerToBusinessSimulator>();
         }
 
         private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
