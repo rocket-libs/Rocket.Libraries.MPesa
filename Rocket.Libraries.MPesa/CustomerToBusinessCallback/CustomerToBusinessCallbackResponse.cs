@@ -23,5 +23,7 @@ namespace Rocket.Libraries.MPesa.CustomerToBusinessCallback
         public string MiddleName { get; set; }
 
         public string LastName { get; set; }
+
+        public string ResponseDescription { get; set; }
     }
 }
