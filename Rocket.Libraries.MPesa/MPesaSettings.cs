@@ -4,6 +4,8 @@ namespace Rocket.Libraries.MPesa
     {
         public string Environment { get; set; }
 
-        public string CallBackUrl { get; set; }
+        public int HttpRetries { get; set; }
+
+        public string StkCallBackUrl { get; set; }
     }
 }
