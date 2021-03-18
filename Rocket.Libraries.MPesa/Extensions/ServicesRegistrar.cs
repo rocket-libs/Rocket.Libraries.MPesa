@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
@@ -18,8 +19,10 @@ namespace Rocket.Libraries.MPesa.Extensions
 {
     public static class ServicesRegistrar
     {
-        public static void AddMPesaSupport (this IServiceCollection services)
+        private static byte httpRetries;
+        public static void AddMPesaSupport(this IServiceCollection services, byte httpRetries = 0)
         {
+            ServicesRegistrar.httpRetries = httpRetries < 0 ? (byte)0 : httpRetries;
             services
                 .AddMemoryCache()
                 .RegisterHttpClients()
@@ -38,29 +41,30 @@ namespace Rocket.Libraries.MPesa.Extensions
                 .AddScoped<IValidationResponseHelper, ValidationResponseHelper>()
                 .AddScoped<ICustomerToBusinessUrlRegistrar, CustomerToBusinessUrlRegistrar>()
                 .AddScoped<ICustomerToBusinessSimulator, CustomerToBusinessSimulator>();
+
+
         }
 
-        private static IServiceCollection RegisterHttpClients (this IServiceCollection services)
+        private static IServiceCollection RegisterHttpClients(this IServiceCollection services)
         {
-            const byte defaultRetriesCount = 6;
             services
-                .AddHttpClient (HttpClientTypes.TokenFetcher.ToString ())
-                .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
+                .AddHttpClient(HttpClientTypes.TokenFetcher.ToString())
+                .AddPolicyHandler(GetRetryPolicy(totalRetries: httpRetries));
 
             services
-                .AddHttpClient (HttpClientTypes.GenericClient.ToString ())
-                .AddPolicyHandler (GetRetryPolicy (totalRetries: defaultRetriesCount));
+                .AddHttpClient(HttpClientTypes.GenericClient.ToString())
+                .AddPolicyHandler(GetRetryPolicy(totalRetries: httpRetries));
 
             return services;
         }
 
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy (byte totalRetries)
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(byte totalRetries)
         {
             return HttpPolicyExtensions
-                .HandleTransientHttpError ()
-                .OrResult (msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
-                .OrResult (msg => msg.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                .WaitAndRetryAsync (totalRetries, retryAttempt => TimeSpan.FromSeconds (Math.Pow (2, retryAttempt)));
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                .WaitAndRetryAsync(totalRetries, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         }
     }
 }

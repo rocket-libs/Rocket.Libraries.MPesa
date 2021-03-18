@@ -40,7 +40,7 @@ namespace Rocket.Libraries.MPesa.STKPush
                 BusinessShortCode = transaction.BusinessShortCode.ToString(),
                 Amount = transaction.Amount.ToString(),
                 PhoneNumber = transaction.RequesterPhoneNumber.ToString(),
-                CallBackURL = mPesaSettings.CallBackUrl,
+                CallBackURL = mPesaSettings.StkCallBackUrl,
                 AccountReference = string.IsNullOrEmpty(transaction.AccountReference) ? "NA" : transaction.AccountReference,
                 TransactionDesc = string.IsNullOrEmpty(transaction.Description) ? "NA" : transaction.Description,
                 Passkey = credentials.PassKey,

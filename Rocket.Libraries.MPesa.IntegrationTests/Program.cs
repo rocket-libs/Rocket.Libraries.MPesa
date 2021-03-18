@@ -21,7 +21,7 @@ namespace Rocket.Libraries.MPesa.IntegrationTests
             serviceProviderBuilder.Configure<MPesaSettings>(x => configuration.GetSection(nameof(MPesaSettings)).Bind(x));
             serviceProviderBuilder.Configure<Credential>(x => configuration.GetSection("SingleMPesaTenantCredentials").Bind(x));
             var serviceProvider = serviceProviderBuilder.BuildServiceProvider();
-            RegisterC2BPayment(serviceProvider);
+            B2CPaymentRequest(serviceProvider);
 
 
         }
